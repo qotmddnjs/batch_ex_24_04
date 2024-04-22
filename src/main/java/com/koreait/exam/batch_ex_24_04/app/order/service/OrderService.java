@@ -50,9 +50,9 @@ public class OrderService {
     @Transactional
     public Order create(Member member, List<OrderItem> orderItems) {
         Order order = Order
-                .builder()
-                .member(member)
-                .build();
+            .builder()
+            .member(member)
+            .build();
 
         for(OrderItem orderItem : orderItems) {
             order.addOrderItem(orderItem);
@@ -76,9 +76,18 @@ public class OrderService {
         }
 
         memberService.addCash(orderer,payPrice * -1, "주문결제__예치금결제");
-        
+
         order.setPaymentDone();
         orderRepository.save(order);
     }
 
+    @Transactional
+    public void refund(Order order) {
+        int payPrice = order.getPayPrice();
+        memberService.addCash(order.getMember(),payPrice,"주문환불__예치금환불");
+
+
+        order.setRefundDone();
+        orderRepository.save(order);
+    }
 }
